@@ -1,0 +1,16 @@
+[package]
+name = "swim-clean-all"
+description = "Recursively cleans swim projects"
+authors = ["Ethan Uppal"]
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+argh = "0.1.13"
+snafu = "0.8.5"
+walkdir = "2.5.0"
+indicatif = "0.17.9"
+owo-colors = "4.1.0"
+fs_extra = "1.3.0"
+crossterm = "0.28.1"
