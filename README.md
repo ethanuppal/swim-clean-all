@@ -8,11 +8,16 @@
 (although they probably have a better implementation than the hacky code I
 wrote!).
 
-## Showcase
+## 🚀 Showcase
 
 ![Example usage of the tool](./asset/showcase.gif)
 
-## Install
+## ⚡️ Requirements
+
+Make sure you have [`swim`](https://gitlab.com/spade-lang/swim) installed.
+That's it!
+
+## 📦 Install
 
 Install from <crates.io>:
 
@@ -22,7 +27,7 @@ cargo install swim-clean-all
 
 (Sorry, no `cargo binstall` magic yet.)
 
-## Usage
+## ✨ Usage
 
 ```
 $ swim clean-all --help
