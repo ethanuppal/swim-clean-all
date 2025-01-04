@@ -1,6 +1,6 @@
 # swim-clean-all
 
-![Crates.io Version](https://img.shields.io/crates/v/swim-clean-all)
+[![Crates.io Version](https://img.shields.io/crates/v/swim-clean-all)](https://crates.io/crates/swim-clean-all)
 ![Crates.io License](https://img.shields.io/crates/l/swim-clean-all)
 
 [`swim`](https://gitlab.com/spade-lang/swim) subcommand inspired by the amazing
@@ -19,7 +19,7 @@ That's it!
 
 ## 📦 Install
 
-Install from <crates.io>:
+Install from [crates.io](https://crates.io/crates/swim-clean-all):
 
 ```
 cargo install swim-clean-all
