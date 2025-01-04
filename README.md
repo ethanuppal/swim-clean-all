@@ -1,5 +1,8 @@
 # swim-clean-all
 
+![Crates.io Version](https://img.shields.io/crates/v/swim-clean-all)
+![Crates.io License](https://img.shields.io/crates/l/swim-clean-all)
+
 [`swim`](https://gitlab.com/spade-lang/swim) subcommand inspired by the amazing
 [`cargo-clean-all`](https://github.com/dnlmlr/cargo-clean-all) for Rust
 (although they probably have a better implementation than the hacky code I
