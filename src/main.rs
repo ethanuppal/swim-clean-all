@@ -2,18 +2,20 @@ use indicatif::{HumanBytes, ProgressBar};
 use owo_colors::OwoColorize;
 use snafu::{prelude::*, Whatever};
 use std::{
-    fs,
+    env, fs,
     io::{self, Write},
     path::PathBuf,
+    process,
     time::Duration,
 };
 use walkdir::WalkDir;
 
 use argh::FromArgs;
 
-/// Recursively clean all swim projects in a given directory that match the specified criteria
+/// Recursively clean all swim projects in a given directory that match the
+/// specified criteria
 #[derive(FromArgs)]
-struct Args {
+struct Opts {
     /// directories to skip when traversing
     #[argh(option)]
     skip: Vec<PathBuf>,
@@ -22,39 +24,71 @@ struct Args {
     #[argh(option, default = "100")]
     max_depth: usize,
 
-    /// the root directory to recursively search for swim projects; defaults to the cwd
+    /// the root directory to recursively search for swim projects; defaults to
+    /// the cwd
     #[argh(positional, default = "PathBuf::from(\".\")")]
     search_root: PathBuf,
 }
 
-fn driver() -> Result<(), Whatever> {
-    let args = argh::from_env::<Args>();
+fn parse_opts() -> Result<Opts, &'static str> {
+    let mut args = env::args();
+    let command_name =
+        args.next().ok_or("Missing command name in argument list")?;
 
-    let search_root = fs::canonicalize(&args.search_root).whatever_context(format!(
-        "Failed to canonicalize search root {}",
-        args.search_root.to_string_lossy()
-    ))?;
-
-    let mut skipped_directories = Vec::with_capacity(args.skip.len());
-    for skipped_directory in args.skip {
-        skipped_directories.push(fs::canonicalize(&skipped_directory).whatever_context(
-            format!(
-                "Failed to canonicalize skipped directory {}",
-                skipped_directory.to_string_lossy()
-            ),
-        )?);
+    // A bug in swim (https://gitlab.com/spade-lang/swim/-/blob/2a386a16b0fb3e2ba3a075e073279b25f97d6b56/src/main.rs#L414)
+    // means that the first real argument will actually be the command name. I'm
+    // not going to be too smart about this since the bug will probably be
+    // fixed soon.
+    let mut passed_args = vec![];
+    let first_arg = args.next().ok_or("Missing first argument")?;
+    if first_arg.as_str() == "clean-all" {
+    } else {
+        passed_args.push(first_arg.as_str());
     }
 
-    let spinner = ProgressBar::new_spinner().with_message("Scanning for swim projects");
+    let args = args.collect::<Vec<_>>();
+    passed_args.extend(args.iter().map(String::as_str));
+
+    match Opts::from_args(&[&command_name], &passed_args) {
+        Ok(opts) => Ok(opts),
+        Err(early_exit) => {
+            print!("{}", early_exit.output);
+            process::exit(0)
+        }
+    }
+}
+
+fn driver() -> Result<(), Whatever> {
+    let opts = parse_opts()
+        .whatever_context("Failed to parse command line arguments")?;
+
+    let search_root =
+        fs::canonicalize(&opts.search_root).whatever_context(format!(
+            "Failed to canonicalize search root {}",
+            opts.search_root.to_string_lossy()
+        ))?;
+
+    let mut skipped_directories = Vec::with_capacity(opts.skip.len());
+    for skipped_directory in opts.skip {
+        skipped_directories.push(
+            fs::canonicalize(&skipped_directory).whatever_context(format!(
+                "Failed to canonicalize skipped directory {}",
+                skipped_directory.to_string_lossy()
+            ))?,
+        );
+    }
+
+    let spinner =
+        ProgressBar::new_spinner().with_message("Scanning for swim projects");
     spinner.enable_steady_tick(Duration::from_millis(100));
 
     let projects = WalkDir::new(search_root)
-        .max_depth(args.max_depth)
+        .max_depth(opts.max_depth)
         .into_iter()
         .filter_entry(|entry| {
-            !skipped_directories
-                .iter()
-                .any(|skipped_directory| entry.path().starts_with(skipped_directory))
+            !skipped_directories.iter().any(|skipped_directory| {
+                entry.path().starts_with(skipped_directory)
+            })
         })
         .filter_map(|entry| entry.ok())
         .filter(|entry| {
@@ -85,8 +119,8 @@ fn driver() -> Result<(), Whatever> {
 
     let mut size_saved = 0;
     for project in projects {
-        let potential_savings =
-            fs_extra::dir::get_size(project.path()).whatever_context(format!(
+        let potential_savings = fs_extra::dir::get_size(project.path())
+            .whatever_context(format!(
                 "Failed to get size of directory {}",
                 project.path().to_string_lossy()
             ))?;
@@ -112,14 +146,19 @@ fn driver() -> Result<(), Whatever> {
             .unwrap()
             .whatever_context("Failed to read line from stdin")?;
 
-        crossterm::execute!(io::stdout(), crossterm::cursor::MoveToPreviousLine(1))
-            .whatever_context("Failed to move up one line")?;
+        crossterm::execute!(
+            io::stdout(),
+            crossterm::cursor::MoveToPreviousLine(1)
+        )
+        .whatever_context("Failed to move up one line")?;
 
         if matches!(user_answer.trim(), "y" | "Y" | "yes") {
-            fs::remove_dir_all(project.path().join("build")).whatever_context(format!(
-                "Failed to remove build directory for project at {}",
-                project.path().to_string_lossy()
-            ))?;
+            fs::remove_dir_all(project.path().join("build")).whatever_context(
+                format!(
+                    "Failed to remove build directory for project at {}",
+                    project.path().to_string_lossy()
+                ),
+            )?;
             println!(
                 "Cleaned {} ({}).",
                 project.path().to_string_lossy(),

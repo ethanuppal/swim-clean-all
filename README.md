@@ -5,12 +5,21 @@
 (although they probably have a better implementation than the hacky code I
 wrote!).
 
+## Showcase
+
+![Example usage of the tool](./asset/showcase.gif)
 
 ## Install
 
+Install from <crates.io>:
+
+```
+cargo install swim-clean-all
+```
+
+(Sorry, no `cargo binstall` magic yet.)
 
 ## Usage
-
 
 ```
 $ swim clean-all --help
@@ -27,3 +36,6 @@ Options:
   --max-depth       maximum depth search limit; defaults to 100
   --help, help      display usage information
 ```
+
+Note that cleaning a project will erase the entire build folder instead of
+calling `swim clean` -- I will add support for this customization if requested.
