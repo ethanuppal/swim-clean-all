@@ -38,9 +38,12 @@ fn parse_opts() -> Result<Opts, &'static str> {
     // A bug in swim (https://gitlab.com/spade-lang/swim/-/blob/2a386a16b0fb3e2ba3a075e073279b25f97d6b56/src/main.rs#L414)
     // means that the first real argument will actually be the command name. I'm
     // not going to be too smart about this since the bug will probably be
-    // fixed soon.
+    // fixed soon (although it means you can't specify a directory called
+    // "clean-all" as the first argument. I've submitted a patch in !153.
     let mut passed_args = vec![];
-    let first_arg = args.next().ok_or("Missing first argument")?;
+    let first_arg = args
+        .next()
+        .ok_or("Missing first argument; try --help for usage information")?;
     if first_arg.as_str() == "clean-all" {
     } else {
         passed_args.push(first_arg.as_str());
@@ -58,7 +61,8 @@ fn parse_opts() -> Result<Opts, &'static str> {
     }
 }
 
-fn driver() -> Result<(), Whatever> {
+#[snafu::report]
+fn main() -> Result<(), Whatever> {
     let opts = parse_opts()
         .whatever_context("Failed to parse command line arguments")?;
 
@@ -186,10 +190,4 @@ fn driver() -> Result<(), Whatever> {
     }
 
     Ok(())
-}
-
-fn main() {
-    if let Err(error) = driver() {
-        eprintln!("{}", error);
-    }
 }
