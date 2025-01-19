@@ -8,6 +8,9 @@
 (although they probably have a better implementation than the hacky code I
 wrote!).
 
+You can even set a config file to, for example, automatically skip certain
+directories.
+
 ## 🚀 Showcase
 
 ![Example usage of the tool](./asset/showcase.gif)
@@ -50,3 +53,25 @@ Options:
 
 Note that cleaning a project will erase the entire build folder instead of
 calling `swim clean` -- I will add support for this customization if requested.
+
+### Config File
+
+This subcommand searches for a file named `swim-clean-all.toml`:
+
+1. under the directory given in the environment variable `XDG_CONFIG_HOME`, if
+   specified;
+2. under the standard location for each operating system (the following table is
+   reproduced from [this documentation](https://docs.rs/dirs/6.0.0/dirs/fn.config_local_dir.html) for a user named "Alice");
+    |Platform|Value|Example|
+    |--------|-----|-------|
+    |Linux|`$XDG_CONFIG_HOME` or `$HOME`/.config|/home/alice/.config|
+    |macOS|`$HOME`/Library/Application Support|/Users/Alice/Library/Application Support|
+    |Windows|`{FOLDERID_LocalAppData}`|C:\Users\Alice\AppData\Local|
+3. as a last resort, under `~/.config`
+
+Refer to the definition of `struct Config` in the source code:
+
+```toml
+# swim-clean-all.toml
+skip = ["~/Library"]
+```
