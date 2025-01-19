@@ -35,6 +35,9 @@ const DEFAULT_CONFIG_FILE_NAME: &str = "swim-clean-all.toml";
 struct Config {
     /// Directories to skip when traversing.
     skip: Option<Vec<PathBuf>>,
+
+    /// Maximum depth search limit.
+    max_depth: Option<usize>,
 }
 
 /// Tries to read a config file from `XDG_CONFIG_HOME`, then from the operating
@@ -86,8 +89,8 @@ struct Opts {
     skip: Vec<PathBuf>,
 
     /// maximum depth search limit; defaults to 100
-    #[argh(option, default = "100")]
-    max_depth: usize,
+    #[argh(option)]
+    max_depth: Option<usize>,
 
     /// manually specify a config path, e.g., foo.toml
     #[argh(option)]
@@ -144,6 +147,8 @@ fn parse_opts() -> Result<Opts, Whatever> {
                     if let Some(skip) = config.skip {
                         opts.skip.extend(skip);
                     }
+
+                    opts.max_depth = opts.max_depth.or(config.max_depth);
                 }
             }
 
@@ -207,7 +212,7 @@ fn main() -> Result<(), Whatever> {
         search_root.components().collect::<Vec<_>>().len();
 
     let projects = WalkDir::new(search_root)
-        .max_depth(opts.max_depth)
+        .max_depth(opts.max_depth.unwrap_or(100))
         .into_iter()
         .filter_entry(|entry| {
             !skipped_directories.iter().any(|skipped_directory| {
