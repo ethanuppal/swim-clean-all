@@ -73,5 +73,7 @@ Refer to the definition of `struct Config` in the source code:
 
 ```toml
 # swim-clean-all.toml
+# these are NOT the defaults
 skip = ["~/Library"]
+max-depth = 50
 ```
