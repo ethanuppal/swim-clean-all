@@ -11,16 +11,16 @@ wrote!).
 You can even set a config file to, for example, automatically skip certain
 directories.
 
-## 🚀 Showcase
+## Showcase
 
 ![Example usage of the tool](./asset/showcase.gif)
 
-## ⚡️ Requirements
+## Requirements
 
 Make sure you have [`swim`](https://gitlab.com/spade-lang/swim) installed.
 That's it!
 
-## 📦 Install
+## Install
 
 Install from [crates.io](https://crates.io/crates/swim-clean-all):
 
@@ -30,7 +30,7 @@ cargo install swim-clean-all
 
 (Sorry, no `cargo binstall` magic yet.)
 
-## ✨ Usage
+## Usage
 
 ```
 $ swim clean-all --help
